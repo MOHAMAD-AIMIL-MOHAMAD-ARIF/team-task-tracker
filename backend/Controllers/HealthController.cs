@@ -21,7 +21,7 @@ namespace backend.Controllers
             return Ok(new
             {
                 status = "healthy",
-                message = "API is running"
+                message = "Backend API is running"
             });
         }
     }
