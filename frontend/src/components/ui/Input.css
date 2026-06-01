@@ -1,0 +1,10 @@
+.ui-input { margin-bottom: 0.75rem; }
+.ui-input__label { display: block; margin-bottom: 0.25rem; font-weight: 600; }
+.ui-input__control {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+}
+.ui-input__control--textarea { resize: vertical; }
+.ui-input__error { margin-top: 0.35rem; color: #b91c1c; font-size: 0.9rem; }
