@@ -1,4 +1,4 @@
-import type { TaskItem } from "../types/task";
+import type { TaskItem, CreateTaskRequest } from "../types/task";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -25,3 +25,33 @@ export async function getTasks(): Promise<TaskItem[]> {
 
     return response.json();
 }
+
+export async function createTask(payload: CreateTaskRequest): Promise<TaskItem> {
+    const response = await fetch(`${API_BASE_URL}/api/tasks`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+        let message = "Failed to create task";
+
+        try {
+            const errorBody = await response.json();
+            if (typeof errorBody?.message === "string") {
+                message = errorBody.message;
+            } else if (typeof errorBody?.title === "string") {
+                message = errorBody.title;
+            }
+        } catch {
+            // keep default message if response is not JSON
+        }
+
+        throw new Error(message);
+    }
+
+    return response.json();
+}
+

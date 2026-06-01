@@ -4,3 +4,8 @@ export type TaskItem = {
     description?: string | null;
     isCompleted: boolean;
 };
+
+export type CreateTaskRequest = {
+    title: string;
+    description?: string;
+};

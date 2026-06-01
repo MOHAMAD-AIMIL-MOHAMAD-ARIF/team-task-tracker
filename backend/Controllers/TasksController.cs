@@ -37,4 +37,32 @@ public class TasksController : ControllerBase
     {
         return Ok(Tasks);
     }
+
+    [HttpPost]
+    public ActionResult<TaskItem> CreateTask([FromBody] CreateTaskRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title))
+            return BadRequest(new { message = "Title is required." });
+
+        var nextId = Tasks.Count == 0 ? 1 : Tasks.Max(t => t.Id) + 1;
+
+        var newTask = new TaskItem()
+        {
+            Id = nextId,
+            Title = request.Title.Trim(),
+            Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
+            IsCompleted = false
+        };
+
+        Tasks.Add(newTask);
+
+        return Created($"api/tasks/{newTask.Id}", newTask);
+    }
+}
+
+// DTO for POST /api/tasks input
+public class CreateTaskRequest
+{
+    public string Title { get; set; } = "";
+    public string? Description { get; set; }
 }
