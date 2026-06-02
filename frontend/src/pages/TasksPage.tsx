@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import type { SyntheticEvent  } from "react";
 import { createTask, getTasks } from "../api/client";
 import type { CreateTaskRequest, TaskItem } from "../types/task";
+import SectionHeader from "../components/ui/SectionHeader";
+import TaskForm from "../components/tasks/TaskForm";
+import TaskList from "../components/tasks/TaskList";
 
 function TasksPage() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -16,7 +19,6 @@ function TasksPage() {
   async function loadTasks() {
     setIsLoading(true);
     setErrorMessage("");
-
     try {
       const data = await getTasks();
       setTasks(data);
@@ -31,9 +33,7 @@ function TasksPage() {
     loadTasks();
   }, []);
 
-  async function handleSubmit(
-    event: SyntheticEvent<HTMLFormElement, SubmitEvent>
-  ) {
+  async function handleSubmit(event: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
     event.preventDefault();
     setFormError("");
 
@@ -52,12 +52,9 @@ function TasksPage() {
 
     try {
       setIsSubmitting(true);
-
       await createTask(payload);
-
       setTitle("");
       setDescription("");
-
       await loadTasks();
     } catch (error) {
       const message =
@@ -68,67 +65,24 @@ function TasksPage() {
     }
   }
 
-  if (isLoading) {
-    return <p>Loading tasks...</p>;
-  }
-
-  if (errorMessage) {
-    return <p>{errorMessage}</p>;
-  }
+  if (isLoading) return <p>Loading tasks...</p>;
+  if (errorMessage) return <p>{errorMessage}</p>;
 
   return (
     <section>
-      <h1>Tasks</h1>
+      <SectionHeader title="Tasks" subtitle="Track and create tasks" />
 
-      <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
-        <div style={{ marginBottom: "0.5rem" }}>
-            <label htmlFor="task-title">Title</label>
-            <br />
-            <input
-              id="task-title"
-              type="text"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              disabled={isSubmitting}
-              placeholder="Enter task title"
-            />
-        </div>
+      <TaskForm
+        title={title}
+        description={description}
+        formError={formError}
+        isSubmitting={isSubmitting}
+        onTitleChange={setTitle}
+        onDescriptionChange={setDescription}
+        onSubmit={handleSubmit}
+      />
 
-        <div style={{ marginBottom: "0.5rem" }}>
-          <label htmlFor="task-description">Description</label>
-          <br />
-          <textarea
-            id="task-description"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            disabled={isSubmitting}
-            placeholder="Optional description"
-            rows={3}
-          />
-        </div>
-
-        {formError && <p style={{ color: "crimson" }}>{formError}</p>}
-
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create Task"}
-        </button>
-      </form>
-
-      {tasks.length === 0 ? (
-        <p>No tasks found.</p>
-      ) : (
-        <ul>
-          {tasks.map((task) => (
-            <li key={task.id}>
-              <h2>{task.title}</h2>
-
-              {task.description && <p>{task.description}</p>}
-
-              <p>Status: {task.isCompleted ? "Completed" : "Pending"}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+      <TaskList tasks={tasks} />
     </section>
   );
 }
