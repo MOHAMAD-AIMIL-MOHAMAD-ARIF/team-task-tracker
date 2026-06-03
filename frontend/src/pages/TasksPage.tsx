@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { SyntheticEvent  } from "react";
+import type { SyntheticEvent } from "react";
 import { createTask, getTasks } from "../api/client";
 import type { CreateTaskRequest, TaskItem } from "../types/task";
 import SectionHeader from "../components/ui/SectionHeader";
@@ -30,10 +30,33 @@ function TasksPage() {
   }
 
   useEffect(() => {
-    loadTasks();
+    let ignore = false;
+
+    void getTasks()
+      .then((data) => {
+        if (!ignore) {
+          setTasks(data);
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          setErrorMessage("Could not load tasks.");
+        }
+      })
+      .finally(() => {
+        if (!ignore) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
-  async function handleSubmit(event: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
+  async function handleSubmit(
+    event: SyntheticEvent<HTMLFormElement, SubmitEvent>
+  ) {
     event.preventDefault();
     setFormError("");
 
