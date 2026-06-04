@@ -55,3 +55,13 @@ export async function createTask(payload: CreateTaskRequest): Promise<TaskItem> 
     return response.json();
 }
 
+export async function getTask(id: number | string): Promise<TaskItem> {
+  const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch task");
+  }
+
+  return response.json();
+}
+

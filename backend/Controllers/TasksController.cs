@@ -38,6 +38,19 @@ public class TasksController : ControllerBase
         return Ok(Tasks);
     }
 
+    [HttpGet("{id:int")]
+    public ActionResult<TaskItem> GetTaskById(int id)
+    {
+        var task = Tasks.FirstOrDefault(t => t.Id == id);
+
+        if (task is null)
+        {
+            return NotFound(new { message = "Task not found." });
+        }
+
+        return Ok(task);
+    }
+
     [HttpPost]
     public ActionResult<TaskItem> CreateTask([FromBody] CreateTaskRequest request)
     {
