@@ -1,0 +1,16 @@
+.ui-error-message {
+  color: #991b1b;
+}
+
+.ui-error-message--block {
+  border: 1px solid #fecaca;
+  background-color: #fef2f2;
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+  font-weight: 500;
+}
+
+.ui-error-message--inline {
+  margin: 0.5rem 0 0.75rem;
+  font-size: 0.9rem;
+}

@@ -4,6 +4,7 @@ import type { CreateTaskRequest } from "../../types/task";
 import Card from "../ui/Card";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
+import ErrorMessage from "../ui/ErrorMessage";
 
 type TaskFormProps = {
   onCreateTask: (payload: CreateTaskRequest) => Promise<void>;
@@ -69,7 +70,9 @@ function TaskForm({ onCreateTask }: TaskFormProps) {
           rows={3}
         />
 
-        {formError ? <p style={{ color: "crimson" }}>{formError}</p> : null}
+        {formError ? (
+          <ErrorMessage message={formError} variant="inline" />
+        ) : null}
 
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Creating..." : "Create Task"}

@@ -4,6 +4,8 @@ import type { CreateTaskRequest, TaskItem } from "../types/task";
 import SectionHeader from "../components/ui/SectionHeader";
 import TaskForm from "../components/tasks/TaskForm";
 import TaskList from "../components/tasks/TaskList";
+import LoadingState from "../components/ui/LoadingState";
+import ErrorMessage from "../components/ui/ErrorMessage";
 
 function TasksPage() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -43,8 +45,8 @@ function TasksPage() {
     setTasks((currentTasks) => [...currentTasks, createdTask]);
   }
 
-  if (isLoading) return <p>Loading tasks...</p>;
-  if (errorMessage) return <p>{errorMessage}</p>;
+  if (isLoading) return <LoadingState message="Loading tasks..." />;
+  if (errorMessage) return <ErrorMessage message={errorMessage} />;
 
   return (
     <section>
