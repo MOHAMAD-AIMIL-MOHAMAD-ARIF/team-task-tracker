@@ -6,6 +6,7 @@ import SectionHeader from "../components/ui/SectionHeader";
 import LoadingState from "../components/ui/LoadingState";
 import ErrorMessage from "../components/ui/ErrorMessage";
 import Card from "../components/ui/Card";
+import Button from "../components/ui/Button";
 
 function TaskDetailsPage() {
   const { taskId } = useParams();
@@ -42,9 +43,17 @@ function TaskDetailsPage() {
         <p>{task.description || "No description provided."}</p>
         <p>Status: {task.isCompleted ? "Completed" : "Pending"}</p>
 
-        <Link to={`/tasks/${task.id}/edit`}>Edit task</Link>
-        <br />
-        <Link to="/tasks">Back to tasks</Link>
+        <Link to={`/tasks/${task.id}/edit`}>
+          <Button variant="secondary">
+            Edit Task
+          </Button>
+        </Link>
+        <br /><br />
+        <Link to="/tasks">
+          <Button variant="secondary">
+            Back to Tasks
+          </Button>
+        </Link>
       </Card>
     </section>
   );

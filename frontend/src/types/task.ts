@@ -9,3 +9,9 @@ export type CreateTaskRequest = {
     title: string;
     description?: string;
 };
+
+export type UpdateTaskRequest = {
+  title: string;
+  description?: string;
+  isCompleted: boolean;
+};

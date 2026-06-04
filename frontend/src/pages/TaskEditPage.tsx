@@ -1,6 +1,7 @@
-import { Link, useParams } from "react-router-dom";
+import type { FormEvent } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getTask } from "../api/client";
+import { getTask, updateTask  } from "../api/client";
 import type { TaskItem } from "../types/task";
 import SectionHeader from "../components/ui/SectionHeader";
 import LoadingState from "../components/ui/LoadingState";
@@ -10,12 +11,17 @@ import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 
 function TaskEditPage() {
+  const navigate = useNavigate();
   const { taskId } = useParams();
   const [task, setTask] = useState<TaskItem | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [isCompleted, setIsCompleted] = useState(false);
+
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     if (!taskId) return;
@@ -27,6 +33,7 @@ function TaskEditPage() {
         setTask(data);
         setTitle(data.title);
         setDescription(data.description || "");
+        setIsCompleted(data.isCompleted);
       } catch {
         setErrorMessage("Could not load task.");
       } finally {
@@ -37,6 +44,39 @@ function TaskEditPage() {
     void loadTask();
   }, [taskId]);
 
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setFormError("");
+
+        if (!taskId) return;
+
+        const trimmedTitle = title.trim();
+        const trimmedDescription = description.trim();
+
+        if (!trimmedTitle) {
+            setFormError("Title is required.");
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+
+            const updatedTask = await updateTask(taskId, {
+            title: trimmedTitle,
+            description: trimmedDescription || undefined,
+            isCompleted,
+            });
+
+            navigate(`/tasks/${updatedTask.id}`);
+        } catch (error) {
+            const message =
+            error instanceof Error ? error.message : "Could not update task.";
+            setFormError(message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
+
   if (isLoading) return <LoadingState message="Loading task..." />;
   if (errorMessage || !task) return <ErrorMessage message={errorMessage || "Task not found."} />;
 
@@ -45,7 +85,7 @@ function TaskEditPage() {
       <SectionHeader title="Edit Task" subtitle={task.title} />
 
       <Card>
-        <form>
+        <form onSubmit={handleSubmit}>
           <Input
             id="edit-task-title"
             label="Title"
@@ -62,10 +102,21 @@ function TaskEditPage() {
             rows={3}
           />
 
-          <p>Status: {task.isCompleted ? "Completed" : "Pending"}</p>
+          <label>
+            <input
+                type="checkbox"
+                checked={isCompleted}
+                onChange={(event) => setIsCompleted(event.target.checked)}
+                disabled={isSubmitting}
+            />
+            Completed
+          </label>
 
-          <Button type="button" disabled>
-            Save changes coming Day 12
+          {formError ? <ErrorMessage message={formError} variant="inline" /> : null}
+
+          <br /><br />
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save changes"}
           </Button>
 
           <br />

@@ -71,6 +71,29 @@ public class TasksController : ControllerBase
 
         return Created($"api/tasks/{newTask.Id}", newTask);
     }
+
+    [HttpPut("{id:int}")]
+    public ActionResult<TaskItem> UpdateTask(int id, [FromBody] UpdateTaskRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title))
+            return BadRequest(new { message = "Title is required." });
+
+        var task = Tasks.FirstOrDefault(t => t.Id == id);
+
+        if (task is null)
+        {
+            return NotFound(new { message = "Task not found." });
+        }
+
+        task.Title = request.Title.Trim();
+        task.Description = string.IsNullOrWhiteSpace(request.Description)
+            ? null
+            : request.Description.Trim();
+        task.IsCompleted = request.IsCompleted;
+
+        return Ok(task);
+    }
+
 }
 
 // DTO for POST /api/tasks input
@@ -78,4 +101,12 @@ public class CreateTaskRequest
 {
     public string Title { get; set; } = "";
     public string? Description { get; set; }
+}
+
+// DTO for PUT /api/tasks/{id} 
+public class UpdateTaskRequest
+{
+    public string Title { get; set; } = "";
+    public string? Description { get; set; }
+    public bool IsCompleted { get; set; }
 }
