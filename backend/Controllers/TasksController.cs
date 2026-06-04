@@ -38,7 +38,7 @@ public class TasksController : ControllerBase
         return Ok(Tasks);
     }
 
-    [HttpGet("{id:int")]
+    [HttpGet("{id:int}")]
     public ActionResult<TaskItem> GetTaskById(int id)
     {
         var task = Tasks.FirstOrDefault(t => t.Id == id);
