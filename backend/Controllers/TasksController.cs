@@ -94,6 +94,21 @@ public class TasksController : ControllerBase
         return Ok(task);
     }
 
+    [HttpDelete("{id:int}")]
+    public IActionResult DeleteTask(int id)
+    {
+        var task = Tasks.FirstOrDefault(t => t.Id == id);
+
+        if (task is null)
+        {
+            return NotFound(new { message = "Task not found." });
+        }
+
+        Tasks.Remove(task);
+
+        return NoContent();
+    }
+
 }
 
 // DTO for POST /api/tasks input
