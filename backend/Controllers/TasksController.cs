@@ -1,3 +1,4 @@
+using backend.Dtos.Tasks;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,13 +34,13 @@ public class TasksController : ControllerBase
     ];
 
     [HttpGet]
-    public ActionResult<IEnumerable<TaskItem>> GetTasks()
+    public ActionResult<IEnumerable<TaskDto>> GetTasks()
     {
-        return Ok(Tasks);
+        return Ok(Tasks.Select(ToDto));
     }
 
     [HttpGet("{id:int}")]
-    public ActionResult<TaskItem> GetTaskById(int id)
+    public ActionResult<TaskDto> GetTaskById(int id)
     {
         var task = Tasks.FirstOrDefault(t => t.Id == id);
 
@@ -48,11 +49,11 @@ public class TasksController : ControllerBase
             return NotFound(new { message = "Task not found." });
         }
 
-        return Ok(task);
+        return Ok(ToDto(task));
     }
 
     [HttpPost]
-    public ActionResult<TaskItem> CreateTask([FromBody] CreateTaskRequest request)
+    public ActionResult<TaskDto> CreateTask([FromBody] CreateTaskDto request)
     {
         if (string.IsNullOrWhiteSpace(request.Title))
             return BadRequest(new { message = "Title is required." });
@@ -69,11 +70,15 @@ public class TasksController : ControllerBase
 
         Tasks.Add(newTask);
 
-        return Created($"api/tasks/{newTask.Id}", newTask);
+        return CreatedAtAction(
+            nameof(GetTaskById),
+            new { id = newTask.Id },
+            ToDto(newTask)
+        );
     }
 
     [HttpPut("{id:int}")]
-    public ActionResult<TaskItem> UpdateTask(int id, [FromBody] UpdateTaskRequest request)
+    public ActionResult<TaskDto> UpdateTask(int id, [FromBody] UpdateTaskDto request)
     {
         if (string.IsNullOrWhiteSpace(request.Title))
             return BadRequest(new { message = "Title is required." });
@@ -91,7 +96,7 @@ public class TasksController : ControllerBase
             : request.Description.Trim();
         task.IsCompleted = request.IsCompleted;
 
-        return Ok(task);
+        return Ok(ToDto(task));
     }
 
     [HttpDelete("{id:int}")]
@@ -109,19 +114,15 @@ public class TasksController : ControllerBase
         return NoContent();
     }
 
-}
+    private static TaskDto ToDto(TaskItem task)
+    {
+        return new TaskDto
+        {
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            IsCompleted = task.IsCompleted
+        };
+    }
 
-// DTO for POST /api/tasks input
-public class CreateTaskRequest
-{
-    public string Title { get; set; } = "";
-    public string? Description { get; set; }
-}
-
-// DTO for PUT /api/tasks/{id} 
-public class UpdateTaskRequest
-{
-    public string Title { get; set; } = "";
-    public string? Description { get; set; }
-    public bool IsCompleted { get; set; }
 }
