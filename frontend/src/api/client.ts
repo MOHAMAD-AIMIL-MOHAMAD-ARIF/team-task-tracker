@@ -3,6 +3,11 @@ import type {
   CreateTaskRequest,
   UpdateTaskRequest,
 } from "../types/task";
+import type {
+  Project,
+  CreateProjectRequest,
+  UpdateProjectRequest,
+} from "../types/project";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -19,6 +24,10 @@ export async function getHealth() {
 
     return response.json();
 }
+
+/*
+  Functions for Tasks domain
+*/
 
 export async function getTasks(): Promise<TaskItem[]> {
     const response = await fetch(`${API_BASE_URL}/api/tasks`);
@@ -109,6 +118,119 @@ export async function deleteTask(id: number | string): Promise<void> {
 
   if (!response.ok) {
     let message = "Failed to delete task";
+
+    try {
+      const errorBody = await response.json();
+
+      if (typeof errorBody?.message === "string") {
+        message = errorBody.message;
+      } else if (typeof errorBody?.title === "string") {
+        message = errorBody.title;
+      }
+    } catch {
+      // keep default message if response is not JSON
+    }
+
+    throw new Error(message);
+  }
+}
+
+/*
+  Functions for Projects domain
+*/
+
+export async function getProjects(): Promise<Project[]> {
+  const response = await fetch(`${API_BASE_URL}/api/projects`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch projects");
+  }
+
+  return response.json();
+}
+
+export async function createProject(
+  payload: CreateProjectRequest
+): Promise<Project> {
+  const response = await fetch(`${API_BASE_URL}/api/projects`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let message = "Failed to create project";
+
+    try {
+      const errorBody = await response.json();
+
+      if (typeof errorBody?.message === "string") {
+        message = errorBody.message;
+      } else if (typeof errorBody?.title === "string") {
+        message = errorBody.title;
+      }
+    } catch {
+      // keep default message if response is not JSON
+    }
+
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export async function getProject(id: number | string): Promise<Project> {
+  const response = await fetch(`${API_BASE_URL}/api/projects/${id}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch project");
+  }
+
+  return response.json();
+}
+
+export async function updateProject(
+  id: number | string,
+  payload: UpdateProjectRequest
+): Promise<Project> {
+  const response = await fetch(`${API_BASE_URL}/api/projects/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let message = "Failed to update project";
+
+    try {
+      const errorBody = await response.json();
+
+      if (typeof errorBody?.message === "string") {
+        message = errorBody.message;
+      } else if (typeof errorBody?.title === "string") {
+        message = errorBody.title;
+      }
+    } catch {
+      // keep default message if response is not JSON
+    }
+
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export async function deleteProject(id: number | string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/projects/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    let message = "Failed to delete project";
 
     try {
       const errorBody = await response.json();

@@ -1,4 +1,6 @@
+using backend.Services.Projects;
 using backend.Services.Tasks;
+
 namespace backend
 {
     public class Program
@@ -10,6 +12,7 @@ namespace backend
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddSingleton<ITaskService, TaskService>();
+            builder.Services.AddSingleton<IProjectService, ProjectService>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
