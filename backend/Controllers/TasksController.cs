@@ -16,30 +16,37 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(TaskDto[]), StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<TaskDto>> GetTasks()
     {
         return Ok(_taskService.GetTasks());
     }
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(TaskDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public ActionResult<TaskDto> GetTaskById(int id)
     {
         var task = _taskService.GetTaskById(id);
 
         if (task is null)
         {
-            return NotFound(new { message = "Task not found." });
+            return NotFound(new ProblemDetails
+            {
+                Title = "Task not found",
+                Detail = $"No task exists with id {id}.",
+                Status = StatusCodes.Status404NotFound
+            });
         }
 
         return Ok(task);
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(TaskDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public ActionResult<TaskDto> CreateTask([FromBody] CreateTaskDto request)
     {
-        if (string.IsNullOrWhiteSpace(request.Title))
-            return BadRequest(new { message = "Title is required." });
-
         var task = _taskService.CreateTask(request);
 
         return CreatedAtAction(
@@ -50,29 +57,41 @@ public class TasksController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [ProducesResponseType(typeof(TaskDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public ActionResult<TaskDto> UpdateTask(int id, [FromBody] UpdateTaskDto request)
     {
-        if (string.IsNullOrWhiteSpace(request.Title))
-            return BadRequest(new { message = "Title is required." });
-
         var task = _taskService.UpdateTask(id, request);
 
         if (task is null)
         {
-            return NotFound(new { message = "Task not found." });
+            return NotFound(new ProblemDetails
+            {
+                Title = "Task not found",
+                Detail = $"No task exists with id {id}.",
+                Status = StatusCodes.Status404NotFound
+            });
         }
 
         return Ok(task);
     }
 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult DeleteTask(int id)
     {
         var deleted = _taskService.DeleteTask(id);
 
         if (!deleted)
         {
-            return NotFound(new { message = "Task not found." });
+            return NotFound(new ProblemDetails
+            {
+                Title = "Task not found",
+                Detail = $"Couldn't delete, no task exists with id {id}.",
+                Status = StatusCodes.Status404NotFound
+            });
         }
 
         return NoContent();
