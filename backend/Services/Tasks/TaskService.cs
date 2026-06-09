@@ -1,10 +1,18 @@
 using backend.Dtos.Tasks;
 using backend.Models;
+using backend.Services.Projects;
 
 namespace backend.Services.Tasks;
 
 public class TaskService : ITaskService
 {
+    private readonly IProjectService _projectService;
+
+    public TaskService(IProjectService projectService)
+    {
+        _projectService = projectService;
+    }
+
     private readonly List<TaskItem> _tasks =
     [
         new TaskItem
@@ -12,21 +20,24 @@ public class TaskService : ITaskService
             Id = 1,
             Title = "Set up React+Vite frontend",
             Description = "Create the Vite React app",
-            IsCompleted = true
+            IsCompleted = true,
+            ProjectId = 1,
         },
         new TaskItem
         {
             Id = 2,
             Title = "Set up ASP.NET Core backend",
             Description = "Create the Web API project",
-            IsCompleted = true
+            IsCompleted = true,
+            ProjectId = 2,
         },
         new TaskItem
         {
             Id = 3,
             Title = "Connect frontend to backend",
             Description = "Fetch data from the API",
-            IsCompleted = false
+            IsCompleted = false,
+            ProjectId = null,
         }
     ];
 
@@ -52,7 +63,8 @@ public class TaskService : ITaskService
             Description = string.IsNullOrWhiteSpace(request.Description)
                 ? null
                 : request.Description.Trim(),
-            IsCompleted = false
+            IsCompleted = false,
+            ProjectId = request.ProjectId
         };
 
         _tasks.Add(task);
@@ -74,6 +86,7 @@ public class TaskService : ITaskService
             ? null
             : request.Description.Trim();
         task.IsCompleted = request.IsCompleted;
+        task.ProjectId = request.ProjectId;
 
         return ToDto(task);
     }
@@ -91,14 +104,20 @@ public class TaskService : ITaskService
         return true;
     }
 
-    private static TaskDto ToDto(TaskItem task)
+    private TaskDto ToDto(TaskItem task)
     {
+        var project = task.ProjectId is null
+            ? null
+            : _projectService.GetProjectById(task.ProjectId.Value);
+
         return new TaskDto
         {
             Id = task.Id,
             Title = task.Title,
             Description = task.Description,
-            IsCompleted = task.IsCompleted
+            IsCompleted = task.IsCompleted,
+            ProjectId = task.ProjectId,
+            ProjectName = project?.Name,
         };
     }
 }

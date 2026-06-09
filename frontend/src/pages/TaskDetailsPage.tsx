@@ -65,6 +65,7 @@ function TaskDetailsPage() {
 
       <Card>
         <p>{task.description || "No description provided."}</p>
+        <p>Project: {task.projectName || "Unassigned"}</p>
         <p>Status: {task.isCompleted ? "Completed" : "Pending"}</p>
 
         <Link to={`/tasks/${task.id}/edit`}>

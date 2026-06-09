@@ -12,6 +12,7 @@ function TaskListItem({ task }: TaskListItemProps) {
       <Card>
         <h2>{task.title}</h2>
         {task.description ? <p>{task.description}</p> : null}
+        <p>Project: {task.projectName || "Unassigned"}</p>
         <p>Status: {task.isCompleted ? "Completed" : "Pending"}</p>
       </Card>
     </Link>

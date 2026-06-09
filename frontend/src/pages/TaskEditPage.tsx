@@ -1,8 +1,9 @@
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getTask, updateTask  } from "../api/client";
+import { getProjects, getTask, updateTask  } from "../api/client";
 import type { TaskItem } from "../types/task";
+import type { Project } from "../types/project";
 import SectionHeader from "../components/ui/SectionHeader";
 import LoadingState from "../components/ui/LoadingState";
 import ErrorMessage from "../components/ui/ErrorMessage";
@@ -17,6 +18,8 @@ function TaskEditPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isCompleted, setIsCompleted] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectId, setProjectId] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,13 +30,18 @@ function TaskEditPage() {
     if (!taskId) return;
     const id = taskId;
 
-    async function loadTask() {
+    async function loadData() {
       try {
-        const data = await getTask(id);
-        setTask(data);
-        setTitle(data.title);
-        setDescription(data.description || "");
-        setIsCompleted(data.isCompleted);
+        const [taskData, projectsData] = await Promise.all([
+          getTask(id),
+          getProjects(),
+        ]);
+        setTask(taskData);
+        setProjects(projectsData);
+        setTitle(taskData.title);
+        setDescription(taskData.description || "");
+        setIsCompleted(taskData.isCompleted);
+        setProjectId(taskData.projectId ? String(taskData.projectId) : "");
       } catch {
         setErrorMessage("Could not load task.");
       } finally {
@@ -41,7 +49,7 @@ function TaskEditPage() {
       }
     }
 
-    void loadTask();
+    void loadData();
   }, [taskId]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -65,6 +73,7 @@ function TaskEditPage() {
             title: trimmedTitle,
             description: trimmedDescription || undefined,
             isCompleted,
+            projectId: projectId ? Number(projectId) : null,
             });
 
             navigate(`/tasks/${updatedTask.id}`);
@@ -86,6 +95,21 @@ function TaskEditPage() {
 
       <Card>
         <form onSubmit={handleSubmit}>
+          <label htmlFor="task-project">Project</label><br />
+          <select
+            id="task-project"
+            value={projectId}
+            onChange={(event) => setProjectId(event.target.value)}
+            disabled={isSubmitting}
+          >
+            <option value="">Unassigned</option>
+            {projects.map((project) => (
+              <option key={project.id} value={project.id}>
+                {project.name}
+              </option>
+            ))}
+          </select>
+          <br /><br />
           <Input
             id="edit-task-title"
             label="Title"

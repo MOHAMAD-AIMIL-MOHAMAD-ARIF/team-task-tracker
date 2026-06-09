@@ -12,4 +12,5 @@ public class UpdateTaskDto
     [MaxLength(1000, ErrorMessage = "Description must be 1000 characters or fewer.")]
     public string? Description { get; set; }
     public bool IsCompleted { get; set; }
+    public int? ProjectId { get; set; }
 }

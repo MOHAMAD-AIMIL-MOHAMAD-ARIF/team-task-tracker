@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { createTask, getTasks } from "../api/client";
+import { createTask, getProjects, getTasks } from "../api/client";
 import type { CreateTaskRequest, TaskItem } from "../types/task";
 import SectionHeader from "../components/ui/SectionHeader";
 import TaskForm from "../components/tasks/TaskForm";
 import TaskList from "../components/tasks/TaskList";
 import LoadingState from "../components/ui/LoadingState";
 import ErrorMessage from "../components/ui/ErrorMessage";
+import type { Project } from "../types/project";
 
 function TasksPage() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -17,10 +19,14 @@ function TasksPage() {
 
     async function loadTasks() {
       try {
-        const data = await getTasks();
+        const [tasksData, projectsData] = await Promise.all([
+          getTasks(),
+          getProjects(),
+        ]);
 
         if (!ignore) {
-          setTasks(data);
+          setTasks(tasksData);
+          setProjects(projectsData);
         }
       } catch {
         if (!ignore) {
@@ -52,7 +58,7 @@ function TasksPage() {
     <section>
       <SectionHeader title="Tasks" subtitle="Track and create tasks" />
 
-      <TaskForm onCreateTask={handleCreateTask} />
+      <TaskForm projects={projects} onCreateTask={handleCreateTask} />
 
       <TaskList tasks={tasks} />
     </section>

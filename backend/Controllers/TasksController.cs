@@ -1,4 +1,5 @@
 using backend.Dtos.Tasks;
+using backend.Services.Projects;
 using backend.Services.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +10,19 @@ namespace backend.Controllers;
 public class TasksController : ControllerBase
 {
     private readonly ITaskService _taskService;
+    private readonly IProjectService _projectService;
 
-    public TasksController(ITaskService taskService)
+    public TasksController(
+        ITaskService taskService,
+        IProjectService projectService)
     {
         _taskService = taskService;
+        _projectService = projectService;
+    }
+
+    private bool ProjectExists(int? projectId)
+    {
+        return projectId is null || _projectService.GetProjectById(projectId.Value) is not null;
     }
 
     [HttpGet]
@@ -47,6 +57,16 @@ public class TasksController : ControllerBase
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public ActionResult<TaskDto> CreateTask([FromBody] CreateTaskDto request)
     {
+        if (!ProjectExists(request.ProjectId))
+        {
+            ModelState.AddModelError(
+                nameof(request.ProjectId),
+                $"No project exists with id {request.ProjectId}."
+            );
+
+            return ValidationProblem(ModelState);
+        }
+
         var task = _taskService.CreateTask(request);
 
         return CreatedAtAction(
@@ -62,6 +82,16 @@ public class TasksController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public ActionResult<TaskDto> UpdateTask(int id, [FromBody] UpdateTaskDto request)
     {
+        if (!ProjectExists(request.ProjectId))
+        {
+            ModelState.AddModelError(
+                nameof(request.ProjectId),
+                $"No project exists with id {request.ProjectId}."
+            );
+
+            return ValidationProblem(ModelState);
+        }
+
         var task = _taskService.UpdateTask(id, request);
 
         if (task is null)
