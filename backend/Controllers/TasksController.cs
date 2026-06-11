@@ -1,3 +1,4 @@
+using backend.Dtos.Common;
 using backend.Dtos.Tasks;
 using backend.Services.Projects;
 using backend.Services.Tasks;
@@ -26,10 +27,35 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(TaskDto[]), StatusCodes.Status200OK)]
-    public ActionResult<IEnumerable<TaskDto>> GetTasks()
+    [ProducesResponseType(typeof(PagedResultDto<TaskDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public ActionResult<PagedResultDto<TaskDto>> GetTasks([FromQuery] TaskQueryParameters query)
     {
-        return Ok(_taskService.GetTasks());
+        var validStatuses = new[] { "all", "pending", "completed" };
+        var validSortFields = new[] { "id", "title", "status", "project" };
+        var validSortDirections = new[] { "asc", "desc" };
+
+        if (!validStatuses.Contains(query.Status.ToLowerInvariant()))
+        {
+            ModelState.AddModelError(nameof(query.Status), "Status must be all, pending, or completed.");
+        }
+
+        if (!validSortFields.Contains(query.SortBy.ToLowerInvariant()))
+        {
+            ModelState.AddModelError(nameof(query.SortBy), "SortBy must be id, title, status, or project.");
+        }
+
+        if (!validSortDirections.Contains(query.SortDirection.ToLowerInvariant()))
+        {
+            ModelState.AddModelError(nameof(query.SortDirection), "SortDirection must be asc or desc.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        return Ok(_taskService.GetTasks(query));
     }
 
     [HttpGet("{id:int}")]

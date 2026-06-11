@@ -1,10 +1,11 @@
 using backend.Dtos.Tasks;
+using backend.Dtos.Common;
 
 namespace backend.Services.Tasks;
 
 public interface ITaskService
 {
-    IEnumerable<TaskDto> GetTasks();
+    PagedResultDto<TaskDto> GetTasks(TaskQueryParameters query);
 
     TaskDto? GetTaskById(int id);
 

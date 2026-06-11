@@ -2,12 +2,14 @@ import type {
   TaskItem,
   CreateTaskRequest,
   UpdateTaskRequest,
+  TaskQueryParams,
 } from "../types/task";
 import type {
   Project,
   CreateProjectRequest,
   UpdateProjectRequest,
 } from "../types/project";
+import type { PagedResult } from "../types/common";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -29,8 +31,20 @@ export async function getHealth() {
   Functions for Tasks domain
 */
 
-export async function getTasks(): Promise<TaskItem[]> {
-    const response = await fetch(`${API_BASE_URL}/api/tasks`);
+export async function getTasks(
+  query: TaskQueryParams
+): Promise<PagedResult<TaskItem>> {
+    const params = new URLSearchParams({
+      status: query.status,
+      search: query.search,
+      projectName: query.projectName,
+      sortBy: query.sortBy,
+      sortDirection: query.sortDirection,
+      pageNumber: String(query.pageNumber),
+      pageSize: String(query.pageSize),
+    });
+
+    const response = await fetch(`${API_BASE_URL}/api/tasks?${params}`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch tasks");
